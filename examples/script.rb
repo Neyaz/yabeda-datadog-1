@@ -3,7 +3,8 @@
 require "bundler/setup"
 require "yabeda/datadog"
 
-# Put Datadog an API key in DATADOG_API_KEY env variable.
+# Put Datadog an API key in DATADOG_API_KEY env variable
+# and appliction key in DATADOG_APP_KEY env variable.
 # Refer to Datadog integrations dashboard for an API key
 
 # To Use this script execute it directly with ruby command.
@@ -15,8 +16,8 @@ require "yabeda/datadog"
 
 Yabeda.configure do
   group :yabeda_datadog_gem_examples_script
-  counter :run_count, "The total number of times the script was executed"
-  gauge :run_time, "Script execution time", unit: "sec"
+  counter :run_count, comment: "The total number of times the script was executed", unit: "execution"
+  gauge :run_time, comment: "Script execution time", unit: "second"
 end
 
 start_time = Time.now
