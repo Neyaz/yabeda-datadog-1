@@ -3,15 +3,11 @@
 require "bundler/setup"
 require "yabeda/datadog"
 
-# Put Datadog an API key in DATADOG_API_KEY env variable
-# and appliction key in DATADOG_APP_KEY env variable.
-# Refer to Datadog integrations dashboard for an API key
-
 # To Use this script execute it directly with ruby command.
 #
 # Example:
 #
-#   DATADOG_API_KEY="your-datadog-api-key-here" ruby script.rb
+#   ruby script.rb
 #
 
 Yabeda.configure do

@@ -5,6 +5,9 @@ require 'datadog/statsd'
 
 module Yabeda
   module Datadog
+    DEFAULT_DATADOG_AGENT_HOST = "localhost".freeze
+    DEFAULT_DATADOG_AGENT_PORT = 8125
+
     # DataDog adapter. Sends yabeda metrics as custom metrics to DataDog API.
     # https://docs.datadoghq.com/integrations/ruby/
     class Adapter < BaseAdapter
@@ -38,7 +41,10 @@ module Yabeda
       private
 
       def dog
-        @dog ||= ::Datadog::Statsd.new(ENV["DATADOG_AGENT_HOST"], 8125)
+        @dog ||= ::Datadog::Statsd.new(
+          ENV["DATADOG_AGENT_HOST"] || DEFAULT_DATADOG_AGENT_HOST,
+          ENV["DATADOG_AGENT_PORT"] || DEFAULT_DATADOG_AGENT_PORT,
+        )
       end
 
       Yabeda.register_adapter(:datadog, new)
