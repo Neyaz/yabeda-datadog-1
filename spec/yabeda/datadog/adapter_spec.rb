@@ -13,7 +13,7 @@ RSpec.describe Yabeda::Datadog::Adapter do
     end
   end
 
-  describe "update metadata" do
+  describe "register metrics" do
     let(:dog_client) { instance_double("Dogapi::Client") }
 
     before do
@@ -29,17 +29,50 @@ RSpec.describe Yabeda::Datadog::Adapter do
     end
 
     it "calls dogapi update_metadata with gauge metric", fake_thread: true do
-      Yabeda.gauge(:water_level, unit: "Ml", per: "???")
+      Yabeda.gauge(:water_level, unit: "Ml", per: nil)
       expected_kwargs = { description: nil, short_name: "water_level",
-                          type: "gauge", per_unit: "???", unit: "Ml", }
+                          type: "gauge", per_unit: nil, unit: "Ml", }
       expect(dog_client).to have_received(:update_metadata).with("water_level", expected_kwargs)
     end
 
-    it "calls dogapi update_metadata with histogram metric", fake_thread: true do
+    it "calls dogapi update_metadata with all histogram metrics", fake_thread: true do
       Yabeda.histogram(:gate_throughput, unit: "cubic_meters", per: "gate_open", buckets: [1, 10, 100, 1_000, 10_000])
-      expected_kwargs = { description: nil, short_name: "gate_throughput",
-                          type: "histogram", per_unit: "gate_open", unit: "cubic_meters", }
-      expect(dog_client).to have_received(:update_metadata).with("gate_throughput", expected_kwargs)
+      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.avg",
+                                                                 short_name: "gate_throughput.avg",
+                                                                 description: nil,
+                                                                 unit: "cubic_meters",
+                                                                 per_unit: "gate_open",
+                                                                 type: "gauge",)
+      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.count",
+                                                                 short_name: "gate_throughput.count",
+                                                                 description: nil,
+                                                                 unit: nil,
+                                                                 per_unit: nil,
+                                                                 type: "rate",)
+      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.median",
+                                                                 short_name: "gate_throughput.median",
+                                                                 description: nil,
+                                                                 unit: "cubic_meters",
+                                                                 per_unit: "gate_open",
+                                                                 type: "gauge",)
+      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.95percentile",
+                                                                 short_name: "gate_throughput.95percentile",
+                                                                 description: nil,
+                                                                 unit: nil,
+                                                                 per_unit: nil,
+                                                                 type: "gauge",)
+      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.max",
+                                                                 short_name: "gate_throughput.max",
+                                                                 description: nil,
+                                                                 unit: "cubic_meters",
+                                                                 per_unit: "gate_open",
+                                                                 type: "gauge",)
+      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.min",
+                                                                 short_name: "gate_throughput.min",
+                                                                 description: nil,
+                                                                 unit: "cubic_meters",
+                                                                 per_unit: "gate_open",
+                                                                 type: "gauge",)
     end
   end
 

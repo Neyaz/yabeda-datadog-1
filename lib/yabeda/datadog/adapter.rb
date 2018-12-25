@@ -35,8 +35,9 @@ module Yabeda
       end
 
       def register_histogram!(histogram)
-        metric = Metric.new(histogram, "histogram")
-        Thread.new { dogapi.update_metadata(metric.name, metric.metadata) }
+        build_histogram_metrics(histogram).map do |historgam_sub_metric|
+          Thread.new { dogapi.update_metadata(historgam_sub_metric.name, historgam_sub_metric.metadata) }
+        end
       end
 
       def perform_histogram_measure!(historam, tags, value)
@@ -63,13 +64,26 @@ module Yabeda
         tags.map { |key, val| "#{key}:#{val}" }
       end
 
+      def build_histogram_metrics(historgram)
+        [
+          Metric.new(historgram, "gauge", name_sufix: "avg"),
+          Metric.new(historgram, "rate", name_sufix: "count", unit: nil, per_unit: nil),
+          Metric.new(historgram, "gauge", name_sufix: "median"),
+          Metric.new(historgram, "gauge", name_sufix: "95percentile", unit: nil, per_unit: nil),
+          Metric.new(historgram, "gauge", name_sufix: "max"),
+          Metric.new(historgram, "gauge", name_sufix: "min"),
+        ]
+      end
+
       # = Internal adapter representation of metrics
       class Metric
-        def initialize(metric, type)
+        def initialize(metric, type, overides = {})
           @metric = metric
           @type = type
+          @overides = overides
         end
 
+        # TODO: consider to make private
         attr_reader :type
 
         def metadata
@@ -83,26 +97,24 @@ module Yabeda
         end
 
         def name
-          parts = ""
-          parts += "#{metric.group}." if metric.group
-          parts + metric.name.to_s
+          [metric.group, metric.name.to_s, overides[:name_sufix]].compact.join(".")
         end
 
         def description
-          metric.comment
+          overides.fetch(:description, metric.comment)
         end
 
         def unit
-          metric.unit
+          overides.fetch(:unit, metric.unit)
         end
 
         def per_unit
-          metric.per
+          overides.fetch(:per_unit, metric.per)
         end
 
         private
 
-        attr_reader :metric
+        attr_reader :metric, :overides
       end
 
       Yabeda.register_adapter(:datadog, new)
