@@ -15,10 +15,10 @@ require "yabeda/datadog"
 Yabeda.configure do
   group :yabeda_datadog_gem_examples_script
   counter :run_count, comment: "The total number of times the script was executed", unit: "execution"
-  gauge :run_time, comment: "Script execution time in seconds", unit: "second"
+  gauge :run_time, comment: "Script execution time", unit: "second"
 end
 
 start_time = Time.now
-Yabeda.yabeda_datadog_gem_examples_script_run_count.increment(device: "developent_computer")
+Yabeda.yabeda_datadog_gem_examples_script_run_count.increment(host: "dev_machine")
 finish_time = Time.now
-Yabeda.yabeda_datadog_gem_examples_script_run_time.set({ device: "developent_computer" }, finish_time - start_time)
+Yabeda.yabeda_datadog_gem_examples_script_run_time.set({ host: "dev_machine" }, finish_time - start_time)

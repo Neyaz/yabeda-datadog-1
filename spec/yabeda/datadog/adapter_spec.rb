@@ -66,8 +66,8 @@ RSpec.describe Yabeda::Datadog::Adapter do
     end
 
     it "sends counter metric to dogstats-d", fake_thread: true do
-      Yabeda.fake_dam_gate_opens.increment(gate: 1)
-      expect(dogstatsd).to have_received(:count).with("fake_dam.gate_opens", 1, tags: ["gate_1"])
+      Yabeda.fake_dam_gate_opens.increment(gate: 1, success: true)
+      expect(dogstatsd).to have_received(:count).with("fake_dam.gate_opens", 1, tags: ["gate:1", "success:true"])
     end
 
     it "sends gauge metric to dogstats-d", fake_thread: true do
@@ -77,7 +77,7 @@ RSpec.describe Yabeda::Datadog::Adapter do
 
     it "sends histogram metric to dogstats-d", fake_thread: true do
       Yabeda.fake_dam_gate_throughput.measure({ gate: 1 }, 4321)
-      expect(dogstatsd).to have_received(:histogram).with("fake_dam.gate_throughput", 4321, tags: ["gate_1"])
+      expect(dogstatsd).to have_received(:histogram).with("fake_dam.gate_throughput", 4321, tags: ["gate:1"])
     end
   end
 end

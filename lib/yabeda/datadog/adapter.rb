@@ -60,7 +60,7 @@ module Yabeda
       end
 
       def build_tags(tags)
-        tags.map { |key, val| "#{key}_#{val}" }
+        tags.map { |key, val| "#{key}:#{val}" }
       end
 
       # = Internal adapter representation of metrics
