@@ -21,21 +21,20 @@ Have an instance of Datadog agent and dogstats-d running. For other installation
 
 ## Usage
 
-Require this adapter before Yabeda configuration:
-
-```ruby
-require "yabeda/datadog"
-```
-
-Next configure Yabeda metrics. Refer to [Yabeda documentation](https://github.com/yabeda-rb/yabeda) for instruction how to configure and use Yabeda metrics.
+Configure Yabeda metrics. Refer to [Yabeda documentation](https://github.com/yabeda-rb/yabeda) for instruction how to configure and use Yabeda metrics.
 
 Please note when configuring Yabeda you have to use Datadog units. Refer to [Datadog unit for metrics documentation](https://docs.datadoghq.com/developers/metrics/#units).
+If a unit of a metric is not supported by Datadog, this unit will not be automatically updated. But you always have ability to update it manyaly in Datadog metrics dashboard or by calling API by yourself.
 
 Refer to [Datadog metrics documentation](https://docs.datadoghq.com/graphing/metrics/) for working with your metrics in Datadog dashboard.
 
 You may specify `DATADOG_AGENT_HOST` and/or `DATADOG_AGENT_PORT` environment variables if your datadog agent is runned not in same host as an app/code that you collection metrics.
 
 HOST?
+
+### Limitations
+
+On first run of your application no metrics metadata will be uptaded. This is happens because metrics have not yet been collected, thus not been created, and there are nothing to update.
 
 ## Development
 
