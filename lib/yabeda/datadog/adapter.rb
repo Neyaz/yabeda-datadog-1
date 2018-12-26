@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "yabeda/datadog/metric"
+require "yabeda/datadog/tags"
 require "yabeda/base_adapter"
 require "datadog/statsd"
 require "dogapi"
@@ -22,7 +23,7 @@ module Yabeda
 
       def perform_counter_increment!(counter, tags, increment)
         metric = Metric.new(counter, "counter")
-        dogstatsd.count(metric.name, increment, tags: convert_tags(tags))
+        dogstatsd.count(metric.name, increment, tags: Tags.build(tags))
       end
 
       def register_gauge!(gauge)
@@ -32,7 +33,7 @@ module Yabeda
 
       def perform_gauge_set!(gauge, tags, value)
         metric = Metric.new(gauge, "gauge")
-        dogstatsd.gauge(metric.name, value, tags: convert_tags(tags))
+        dogstatsd.gauge(metric.name, value, tags: Tags.build(tags))
       end
 
       def register_histogram!(histogram)
@@ -47,7 +48,7 @@ module Yabeda
 
       def perform_histogram_measure!(historam, tags, value)
         metric = Metric.new(historam, "histogram")
-        dogstatsd.histogram(metric.name, value, tags: convert_tags(tags))
+        dogstatsd.histogram(metric.name, value, tags: Tags.build(tags))
       end
 
       private
@@ -63,10 +64,6 @@ module Yabeda
       def dogapi
         # consider memoization here
         ::Dogapi::Client.new(ENV["DATADOG_API_KEY"], ENV["DATADOG_APP_KEY"])
-      end
-
-      def convert_tags(tags)
-        tags.map { |key, val| "#{key}:#{val}" }
       end
 
       def histogram_metrics(historgram)
