@@ -35,18 +35,12 @@ module Yabeda
 
       # Datadog API argument
       def unit
-        overides.fetch(:unit) do
-          metric_unit = metric.unit
-          metric_unit if metric_unit && UNITS.include?(metric_unit)
-        end
+        overides.fetch(:unit, Unit.find(metric.unit))
       end
 
       # Datadog API argument
       def per_unit
-        overides.fetch(:per_unit) do
-          metric_per = metric.per
-          metric_per if metric_per && UNITS.include?(metric_per)
-        end
+        overides.fetch(:per_unit, Unit.find(metric.per))
       end
 
       # Update metric metadata
