@@ -36,6 +36,10 @@ module Yabeda
         overides.fetch(:per_unit, metric.per)
       end
 
+      def update(api)
+        api.update_metadata(name, metadata)
+      end
+
       private
 
       attr_reader :metric, :type, :overides

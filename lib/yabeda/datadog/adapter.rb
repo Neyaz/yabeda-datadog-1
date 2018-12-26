@@ -17,7 +17,7 @@ module Yabeda
     class Adapter < BaseAdapter
       def register_counter!(counter)
         metric = Metric.new(counter, "counter")
-        Thread.new { dogapi.update_metadata(metric.name, metric.metadata) }
+        Thread.new { metric.update(dogapi) }
       end
 
       def perform_counter_increment!(counter, tags, increment)
@@ -27,7 +27,7 @@ module Yabeda
 
       def register_gauge!(gauge)
         metric = Metric.new(gauge, "gauge")
-        Thread.new { dogapi.update_metadata(metric.name, metric.metadata) }
+        Thread.new { metric.update(dogapi) }
       end
 
       def perform_gauge_set!(gauge, tags, value)
@@ -40,7 +40,7 @@ module Yabeda
         # cause rejections by Datadog API
         Thread.new do
           histogram_metrics(histogram).map do |historgam_sub_metric|
-            dogapi.update_metadata(historgam_sub_metric.name, historgam_sub_metric.metadata)
+            historgam_sub_metric.update(dogapi)
           end
         end
       end
