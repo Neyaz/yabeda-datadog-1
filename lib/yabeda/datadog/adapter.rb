@@ -35,8 +35,12 @@ module Yabeda
       end
 
       def register_histogram!(histogram)
-        build_histogram_metrics(histogram).map do |historgam_sub_metric|
-          Thread.new { dogapi.update_metadata(historgam_sub_metric.name, historgam_sub_metric.metadata) }
+        # sending many requests in separate threads
+        # cause rejections by Datadog API
+        Thread.new do
+          build_histogram_metrics(histogram).map do |historgam_sub_metric|
+            dogapi.update_metadata(historgam_sub_metric.name, historgam_sub_metric.metadata)
+          end
         end
       end
 
