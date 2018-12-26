@@ -3,6 +3,8 @@
 require "bundler/setup"
 require "yabeda/datadog"
 
+Thread.abort_on_exception = true
+
 # To Use this script execute it directly with ruby command.
 # You have to provide DATADOG_API_KEY and DATADOG_APP_KEY
 # environment variables.
