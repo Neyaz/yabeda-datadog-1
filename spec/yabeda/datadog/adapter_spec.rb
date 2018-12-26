@@ -22,56 +22,56 @@ RSpec.describe Yabeda::Datadog::Adapter do
     end
 
     it "calls dogapi update_metadata with counter metric", fake_thread: true do
-      Yabeda.counter(:gate_opens, comment: "gate_opens description")
-      expected_kwargs = { description: "gate_opens description", short_name: "gate_opens",
-                          type: "counter", per_unit: nil, unit: nil, }
-      expect(dog_client).to have_received(:update_metadata).with("gate_opens", expected_kwargs)
+      Yabeda.counter(:script_runs, comment: "How many times the script has been run", unit: "time")
+      expected_kwargs = { description: "How many times the script has been run", short_name: "script_runs",
+                          type: "counter", per_unit: nil, unit: "time", }
+      expect(dog_client).to have_received(:update_metadata).with("script_runs", expected_kwargs)
     end
 
     it "calls dogapi update_metadata with gauge metric", fake_thread: true do
-      Yabeda.gauge(:water_level, unit: "Ml", per: nil)
-      expected_kwargs = { description: nil, short_name: "water_level",
-                          type: "gauge", per_unit: nil, unit: "Ml", }
-      expect(dog_client).to have_received(:update_metadata).with("water_level", expected_kwargs)
+      Yabeda.gauge(:processes, unit: "item")
+      expected_kwargs = { description: nil, short_name: "processes",
+                          type: "gauge", per_unit: nil, unit: "item", }
+      expect(dog_client).to have_received(:update_metadata).with("processes", expected_kwargs)
     end
 
     it "calls dogapi update_metadata with all histogram metrics", fake_thread: true do
-      Yabeda.histogram(:gate_throughput, unit: "cubic_meters", per: "gate_open", buckets: [1, 10, 100, 1_000, 10_000])
-      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.avg",
-                                                                 short_name: "gate_throughput.avg",
+      Yabeda.histogram(:request_duration, unit: "millisecond", per: "request", buckets: [1, 10, 100, 1_000, 10_000])
+      expect(dog_client).to have_received(:update_metadata).with("request_duration.avg",
+                                                                 short_name: "request_duration.avg",
                                                                  description: nil,
-                                                                 unit: "cubic_meters",
-                                                                 per_unit: "gate_open",
+                                                                 unit: "millisecond",
+                                                                 per_unit: "request",
                                                                  type: "gauge",)
-      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.count",
-                                                                 short_name: "gate_throughput.count",
+      expect(dog_client).to have_received(:update_metadata).with("request_duration.count",
+                                                                 short_name: "request_duration.count",
                                                                  description: nil,
                                                                  unit: nil,
                                                                  per_unit: nil,
                                                                  type: "rate",)
-      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.median",
-                                                                 short_name: "gate_throughput.median",
+      expect(dog_client).to have_received(:update_metadata).with("request_duration.median",
+                                                                 short_name: "request_duration.median",
                                                                  description: nil,
-                                                                 unit: "cubic_meters",
-                                                                 per_unit: "gate_open",
+                                                                 unit: "millisecond",
+                                                                 per_unit: "request",
                                                                  type: "gauge",)
-      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.95percentile",
-                                                                 short_name: "gate_throughput.95percentile",
+      expect(dog_client).to have_received(:update_metadata).with("request_duration.95percentile",
+                                                                 short_name: "request_duration.95percentile",
                                                                  description: nil,
                                                                  unit: nil,
                                                                  per_unit: nil,
                                                                  type: "gauge",)
-      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.max",
-                                                                 short_name: "gate_throughput.max",
+      expect(dog_client).to have_received(:update_metadata).with("request_duration.max",
+                                                                 short_name: "request_duration.max",
                                                                  description: nil,
-                                                                 unit: "cubic_meters",
-                                                                 per_unit: "gate_open",
+                                                                 unit: "millisecond",
+                                                                 per_unit: "request",
                                                                  type: "gauge",)
-      expect(dog_client).to have_received(:update_metadata).with("gate_throughput.min",
-                                                                 short_name: "gate_throughput.min",
+      expect(dog_client).to have_received(:update_metadata).with("request_duration.min",
+                                                                 short_name: "request_duration.min",
                                                                  description: nil,
-                                                                 unit: "cubic_meters",
-                                                                 per_unit: "gate_open",
+                                                                 unit: "millisecond",
+                                                                 per_unit: "request",
                                                                  type: "gauge",)
     end
   end
@@ -90,27 +90,27 @@ RSpec.describe Yabeda::Datadog::Adapter do
       allow(dogstatsd).to receive(:histogram)
 
       Yabeda.configure do
-        group :fake_dam
+        group :sidekiq
 
-        counter :gate_opens
-        gauge :water_level
-        histogram :gate_throughput, unit: :cubic_meters, per: :gate_open, buckets: [1, 10, 100, 1_000, 10_000]
+        counter :job_executed_total
+        gauge :active_workers_count
+        histogram :job_runtime, unit: :seconds, per: :item, buckets: [1, 10, 100, 1_000, 10_000]
       end
     end
 
     it "sends counter metric to dogstats-d", fake_thread: true do
-      Yabeda.fake_dam_gate_opens.increment(gate: 1, success: true)
-      expect(dogstatsd).to have_received(:count).with("fake_dam.gate_opens", 1, tags: ["gate:1", "success:true"])
+      Yabeda.sidekiq_job_executed_total.increment(host: :a, success: true)
+      expect(dogstatsd).to have_received(:count).with("sidekiq.job_executed_total", 1, tags: ["host:a", "success:true"])
     end
 
     it "sends gauge metric to dogstats-d", fake_thread: true do
-      Yabeda.fake_dam_water_level.set({}, 42)
-      expect(dogstatsd).to have_received(:gauge).with("fake_dam.water_level", 42, tags: [])
+      Yabeda.sidekiq_active_workers_count.set({}, 42)
+      expect(dogstatsd).to have_received(:gauge).with("sidekiq.active_workers_count", 42, tags: [])
     end
 
     it "sends histogram metric to dogstats-d", fake_thread: true do
-      Yabeda.fake_dam_gate_throughput.measure({ gate: 1 }, 4321)
-      expect(dogstatsd).to have_received(:histogram).with("fake_dam.gate_throughput", 4321, tags: ["gate:1"])
+      Yabeda.sidekiq_job_runtime.measure({ any: :whatever }, 4321)
+      expect(dogstatsd).to have_received(:histogram).with("sidekiq.job_runtime", 4321, tags: ["any:whatever"])
     end
   end
 end
